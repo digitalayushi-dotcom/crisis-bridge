@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crisis Bridge | Watchtower</title>
+    <link rel="manifest" href="admin-manifest.json">
+    <link rel="stylesheet" href="admin-style.css">
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (let registration of registrations) {
+                    registration.unregister(); // Purane cache ko delete kar dega
+                }
+            });
+            // Browser ko force karo ki wo cache use na kare
+            window.addEventListener('load', function () {
+                if (!sessionStorage.getItem('reloaded')) {
+                    sessionStorage.setItem('reloaded', 'true');
+                    window.location.reload(true);
+                }
+            });
+        }
+    </script>
+</head>
+
+<body>
+
+    <!-- ═══ LOGIN SCREEN ═══ -->
+    <div id="login-screen" class="auth-screen">
+        <div class="auth-brand">
+            <div class="auth-icon">🛡️</div>
+            <h1>Watchtower</h1>
+            <p class="auth-tag">AUTHORIZED PERSONNEL ONLY</p>
+        </div>
+        <div class="auth-box">
+            <div class="field-label">EMAIL ADDRESS</div>
+            <div class="input-wrap">
+                <span class="inp-icon">✉️</span>
+                <input type="email" id="adminEmail" placeholder="admin@crisisbridge.com">
+            </div>
+
+            <div class="field-label" style="margin-top:16px;">PASSWORD
+                <a href="#" id="forgotPass" class="forgot-link">Forgot password?</a>
+            </div>
+            <div class="input-wrap">
+                <span class="inp-icon">🔒</span>
+                <input type="password" id="adminPassword" placeholder="••••••••">
+                <button type="button" id="togglePass" class="eye-btn">👁</button>
+            </div>
+
+            <button id="loginBtn" class="auth-btn">ACCESS DASHBOARD →</button>
+            <button id="demoLoginBtn" class="demo-btn">✨ DEMO LOGIN (SKIP AUTH)</button>
+            <p id="authError" class="auth-error"></p>
+
+            <div class="auth-divider"></div>
+            <div class="auth-footer-link">
+                New facility? <a href="register.html">Register here →</a>
+            </div>
+        </div>
+        <div class="auth-tags">
+            <span>● SYSTEM ENCRYPTED</span>
+            <span>● IP LOGGED</span>
+        </div>
+    </div>
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <div id="dashboard-container" class="hidden">
+
+        <!-- Top Nav -->
+        <nav class="top-nav">
+            <div class="nav-left">
+                <div class="nav-logo">🛡️</div>
+                <div>
+                    <div class="nav-title">Crisis Bridge</div>
+                    <div class="nav-location" id="navLocation">Loading...</div>
+                </div>
+            </div>
+            <div class="nav-center">
+                <div class="nav-badge live-badge">● LIVE</div>
+                <div class="nav-badge demo-badge hidden" id="demoBadge">✨ DEMO</div>
+            </div>
+            <div class="nav-right">
+                <div class="nav-time" id="navTime"></div>
+                <button id="settingsBtn" class="nav-btn" title="Settings">⚙️</button>
+                <button id="logoutBtn" class="nav-btn logout-btn" title="Logout">⏻</button>
+            </div>
+        </nav>
+
+        <!-- Guest URL Bar -->
+        <div id="guestUrlBar" class="guest-url-bar hidden">
+            <span class="url-label">🔗 Guest SOS URL:</span>
+            <code id="guestUrlText"></code>
+            <button id="copyUrlBtn" class="copy-btn">📋 Copy Link</button>
+
+            <a id="qrNewTabBtn" class="qr-btn" target="_blank"
+                style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; margin-left: 8px;">🔳
+                Print QR Code</a>
+        </div>
+
+        <script>
+            // Jaise hi mouse button par aayega, link ready ho jayega
+            document.getElementById('qrNewTabBtn').addEventListener('mouseenter', function () {
+                const url = document.getElementById('guestUrlText').textContent;
+                if (url && url.trim() !== "" && !url.includes("Loading")) {
+                    this.href = 'https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=' + encodeURIComponent(url);
+                }
+            });
+
+            document.getElementById('qrNewTabBtn').addEventListener('click', function (e) {
+                if (!this.getAttribute('href')) {
+                    e.preventDefault();
+                    alert("Please wait for the URL to generate!");
+                }
+            });
+        </script>
+
+        <!-- Main Layout -->
+        <div class="dash-layout">
+
+            <aside class="side-nav">
+                <div class="nav-menu">
+                    <button class="side-menu-btn active" id="navLiveBtn"><span>🚨</span> Live Alerts</button>
+                    <button class="side-menu-btn" id="navHistoryBtn"><span>📚</span> History Log</button>
+                </div>
+            </aside>
+
+            <div class="map-panel">
+                <div id="map">
+                    <div class="map-placeholder">
+                        <div class="map-ph-icon">🗺️</div>
+                        <div>Secure Map Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <aside class="feed-panel">
+                <div id="liveView" style="display: flex; flex-direction: column; height: 100%;">
+                    <div class="feed-header">
+                        <div>
+                            <div class="feed-label">COMMAND CENTER</div>
+                            <div class="feed-title">Live SOS Feed</div>
+                        </div>
+                        <div class="alert-count" id="alertCount">00</div>
+                    </div>
+                    <div id="alertList" class="alert-list">
+                        <div class="empty-state">
+                            <div class="empty-icon">✅</div>
+                            <div class="empty-text">No active emergencies</div>
+                            <div class="empty-sub">All systems nominal</div>
+                        </div>
+                    </div>
+                    <div class="stability-box">
+                        <div class="stability-label">OPERATIONAL STABILITY</div>
+                        <div class="stability-time" id="stabilityTime">0h 00m 00s</div>
+                        <div class="stability-sub">since last incident</div>
+                        <div class="stability-bar">
+                            <div class="stability-fill" id="stabilityFill"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="historyView" class="hidden" style="display: flex; flex-direction: column; height: 100%;">
+                    <div class="feed-header">
+                        <div>
+                            <div class="feed-label">SECURITY AUDIT</div>
+                            <div class="feed-title">Resolved Cases</div>
+                        </div>
+                    </div>
+                    <div id="historyList" class="alert-list" style="flex: 1; overflow-y: auto;">
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>⚙️ Emergency Numbers</h2>
+                    <button id="closeSettings" class="modal-close">✕</button>
+                </div>
+                <div class="form-group">
+                    <label>👮 Security Desk</label>
+                    <input type="text" id="setSecurity" placeholder="e.g. 01123456789">
+                </div>
+                <div class="form-group">
+                    <label>🚑 Medical / Ambulance</label>
+                    <input type="text" id="setMedical" placeholder="e.g. 108">
+                </div>
+                <div class="form-group">
+                    <label>🔥 Fire Department</label>
+                    <input type="text" id="setFire" placeholder="e.g. 101">
+                </div>
+                <div class="form-group">
+                    <label>🔧 Maintenance</label>
+                    <input type="text" id="setMaint" placeholder="e.g. 01198765432">
+                </div>
+                <div class="modal-actions">
+                    <button id="saveSettings" class="btn-save">Save Numbers</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- QR Code Modal -->
+        <div id="qrModal" class="modal hidden">
+            <div class="modal-content" style="text-align: center;">
+                <div class="modal-header">
+                    <h2>Scan for Emergency SOS</h2>
+                    <button id="closeQr" class="modal-close">✕</button>
+                </div>
+                <div id="qrcode-display"
+                    style="display:flex; justify-content:center; margin: 20px 0; background: white; padding: 15px; border-radius: 10px;">
+                </div>
+                <p style="font-size: 0.8rem; color: #9ca3af; margin-bottom: 15px;">Print this for the reception desk or
+                    guest rooms.</p>
+            </div>
+        </div>
+
+
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+        <script type="module" src="admin-script.js?v=final"></script>
+</body>
+
+</html>

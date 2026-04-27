@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crisis Bridge | Instant SOS</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0b0e14">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .button-wrapper {
+            overflow: visible !important;
+            min-height: 280px !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+        }
+
+        .sos-button,
+        .ring {
+            border-radius: 50% !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="onboardingOverlay" class="onboarding-overlay hidden">
+        <div class="onboarding-slides">
+            <div class="slide active">
+                <div class="icon-large">🏨</div>
+                <h2>Welcome to Crisis Bridge</h2>
+                <p>Your safety companion at this property</p>
+            </div>
+            <div class="slide hidden">
+                <div class="icon-large">📍</div>
+                <h2>One Tap SOS</h2>
+                <p>Press the button — your location reaches security instantly</p>
+            </div>
+            <div class="slide hidden">
+                <div class="icon-large">📵</div>
+                <h2>Works Offline Too</h2>
+                <p>No internet? Direct emergency numbers are always available</p>
+            </div>
+        </div>
+        <div class="onboarding-footer">
+            <div class="dots">
+                <span class="dot active"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+            <button id="nextBtn" class="primary-btn">Next</button>
+        </div>
+    </div>
+
+    <div class="container" id="mainApp" style="display:none;">
+        <header>
+            <div class="header-top">
+                <div class="hotel-branding">
+                    <div class="hotel-logo">🏨</div>
+                    <div>
+                        <div class="hotel-name" id="hotelDisplayName">Grand Plaza Hotel</div>
+                        <span class="brand-label">Crisis Bridge</span>
+                    </div>
+                </div>
+                <div class="status-indicator" id="networkStatus">Systems Online</div>
+            </div>
+        </header>
+
+        <main>
+            <p class="instruction-line">Tap once. Help is on the way.</p>
+
+            <div class="button-wrapper" id="primaryButtonContainer">
+                <div class="ring ring-1"></div>
+                <div class="ring ring-2"></div>
+                <button class="sos-button" id="sosTrigger">SOS</button>
+            </div>
+
+            <div class="trust-indicators" id="trustIndicators">
+                <div class="trust-pill">
+                    <span class="t-icon">📍</span>
+                    <span>Live Location</span>
+                </div>
+                <div class="trust-pill">
+                    <span class="t-icon">⚡</span>
+                    <span>Instant Alert</span>
+                </div>
+                <div class="trust-pill">
+                    <span class="t-icon">🔒</span>
+                    <span>Encrypted</span>
+                </div>
+            </div>
+
+            <div id="offlineMenu" class="hidden">
+                <h3>📵 Call Directly</h3>
+                <a href="tel:01123456789" class="call-btn security-btn">👮 Hotel Security Desk</a>
+                <a href="tel:108" class="call-btn medical-btn">🚑 Medical / Ambulance</a>
+                <a href="tel:101" class="call-btn fire-btn">🔥 Fire Department</a>
+                <a href="tel:01198765432" class="call-btn maint-btn">🔧 Maintenance</a>
+                <button id="backToSos" class="back-btn">Cancel</button>
+            </div>
+
+            <div id="statusMessage" class="message-default">Ready to assist</div>
+
+            <a href="admin.html" class="admin-link">Hotel Admin? Watchtower →</a>
+        </main>
+    </div>
+
+    <script type="module" src="script.js"></script>
+
+</body>
+
+</html>
